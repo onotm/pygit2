@@ -476,9 +476,13 @@ class BaseRepository(_Repository):
         if isinstance(a, Tree) and isinstance(b, Tree):
             return a.diff_to_tree(b, **dict(zip(opt_keys, opt_values)))
 
-        # Case 2: Index to workdir
+        # Case 2: Head to Index or Index to workdir
         elif a is None and b is None:
-            return self.index.diff_to_workdir(*opt_values)
+            if cached:
+                a = self.__whatever_to_tree_or_blob('HEAD')
+                return a.diff_to_index(self.index, *opt_values)
+            else:
+                return self.index.diff_to_workdir(*opt_values)
 
         # Case 3: Diff tree to index or workdir
         elif isinstance(a, Tree) and b is None:
